@@ -1,11 +1,11 @@
 {
-	"id": "obsidian-sample-plugin",
-	"name": "Sample Plugin",
-	"version": "1.0.0",
+	"id": "obsidian-bridge-plugin",
+	"name": "Bridge Plugin",
+	"version": "0.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "This is a sample plugin for Obsidian. This plugin demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"description": "This is a bridge plugin for Obsidian. This plugin draws bridge hands.",
+	"author": "J. Cooper",
+	"authorUrl": "https://github.com/jon23cooper",
+	"fundingUrl": "",
 	"isDesktopOnly": false
 }
