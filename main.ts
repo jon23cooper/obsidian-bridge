@@ -1,17 +1,58 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 
-// Remember to rename these classes and interfaces!
+class Deck {
 
-interface MyPluginSettings {
+	deck: string[];
+
+	constructor(){
+		this.deck = [];
+		this.reset();
+		this.shuffle();
+	}
+  
+	reset(){
+		this.deck = [];
+  
+		const spades: string[] = ['\u{1F0A1}', '\u{1F0A2}', '\u{1F0A3}', '\u{1F0A4}', '\u{1F0A5}', '\u{1F0A6}', '\u{1F0A7}', '\u{1F0A8}', '\u{1F0A9}', 
+			'\u{1F0AA}', '\u{1F0AB}', '\u{1F0AC}', '\u{1F0AD}', '\u{1F0AE}'];
+		const hearts: string [] = ['\u{1F0B1}', '\u{1F0B2}', '\u{1F0B3}', '\u{1F0B4}', '\u{1F0B5}', '\u{1F0B6}', '\u{1F0B7}', '\u{1F0B8}', '\u{1F0B9}', 
+			'\u{1F0BA}',  '\u{1F0BB}', '\u{1F0BC}', '\u{1F0BD}', '\u{1F0BE}'];
+		const diamonds: string[] = ['\u{1F0C1}', '\u{1F0C2}', '\u{1F0C3}', '\u{1F0C4}', '\u{1F0C5}', '\u{1F0C6}', '\u{1F0C7}', '\u{1F0C8}', '\u{1F0C9}', 
+		'\u{1F0CA}',  '\u{1F0CB}', '\u{1F0CC}', '\u{1F0CD}', '\u{1F0CE}'];
+		const clubs = ['\u{1F0D1}', '\u{1F0D2}', '\u{1F0D3}', '\u{1F0D4}', '\u{1F0D5}', '\u{1F0D6}', '\u{1F0D7}', '\u{1F0D8}', '\u{1F0D9}', 
+		'\u{1F0DA}',  '\u{1F0DB}', '\u{1F0DC}', '\u{1F0DD}', '\u{1F0DE}'];
+	
+		this.deck = [spades, hearts, diamonds, clubs].flat()
+	}
+  
+	shuffle(){
+		const { deck } = this;
+		let m = deck.length, i;
+  
+		while(m){
+			i = Math.floor(Math.random() * m--);
+  
+			[deck[m], deck[i]] = [deck[i], deck[m]];
+		}
+  
+		return this;
+	}
+  
+	deal(): string{
+		return this.deck.pop()??"error";
+	}
+  }
+
+interface BridgePluginSettings {
 	mySetting: string;
 }
 
-const DEFAULT_SETTINGS: MyPluginSettings = {
+const DEFAULT_SETTINGS: BridgePluginSettings = {
 	mySetting: 'default'
 }
 
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+export default class BridgePlugin extends Plugin {
+	settings: BridgePluginSettings;
 
 	async onload() {
 		await this.loadSettings();
@@ -19,7 +60,8 @@ export default class MyPlugin extends Plugin {
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
+			const pack = new Deck().shuffle()
+			new Notice(pack.deal());
 		});
 		// Perform additional things with the ribbon
 		ribbonIconEl.addClass('my-plugin-ribbon-class');
@@ -33,7 +75,7 @@ export default class MyPlugin extends Plugin {
 			id: 'open-sample-modal-simple',
 			name: 'Open sample modal (simple)',
 			callback: () => {
-				new SampleModal(this.app).open();
+				new BridgeModal(this.app).open();
 			}
 		});
 		// This adds an editor command that can perform some operation on the current editor instance
@@ -56,7 +98,7 @@ export default class MyPlugin extends Plugin {
 					// If checking is true, we're simply "checking" if the command can be run.
 					// If checking is false, then we want to actually perform the operation.
 					if (!checking) {
-						new SampleModal(this.app).open();
+						new BridgeModal(this.app).open();
 					}
 
 					// This command will only show up in Command Palette when the check function returns true
@@ -66,7 +108,7 @@ export default class MyPlugin extends Plugin {
 		});
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
+		this.addSettingTab(new BridgeSettingTab(this.app, this));
 
 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 		// Using this function will automatically remove the event listener when this plugin is disabled.
@@ -91,7 +133,7 @@ export default class MyPlugin extends Plugin {
 	}
 }
 
-class SampleModal extends Modal {
+class BridgeModal extends Modal {
 	constructor(app: App) {
 		super(app);
 	}
@@ -107,10 +149,10 @@ class SampleModal extends Modal {
 	}
 }
 
-class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+class BridgeSettingTab extends PluginSettingTab {
+	plugin: BridgePlugin;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: BridgePlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
