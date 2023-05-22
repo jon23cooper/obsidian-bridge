@@ -2,27 +2,26 @@ import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Set
 
 class Deck {
 
-	deck: string[];
+	deck: number[];
+	spades: string[] = ['\u{1F0A1}', '\u{1F0A2}', '\u{1F0A3}', '\u{1F0A4}', '\u{1F0A5}', '\u{1F0A6}', '\u{1F0A7}', '\u{1F0A8}', '\u{1F0A9}', 
+			'\u{1F0AA}', '\u{1F0AB}', '\u{1F0AC}', '\u{1F0AD}', '\u{1F0AE}'];
+	hearts: string [] = ['\u{1F0B1}', '\u{1F0B2}', '\u{1F0B3}', '\u{1F0B4}', '\u{1F0B5}', '\u{1F0B6}', '\u{1F0B7}', '\u{1F0B8}', '\u{1F0B9}', 
+			'\u{1F0BA}',  '\u{1F0BB}', '\u{1F0BC}', '\u{1F0BD}', '\u{1F0BE}'];		
+	diamonds: string[] = ['\u{1F0C1}', '\u{1F0C2}', '\u{1F0C3}', '\u{1F0C4}', '\u{1F0C5}', '\u{1F0C6}', '\u{1F0C7}', '\u{1F0C8}', '\u{1F0C9}', 
+			'\u{1F0CA}',  '\u{1F0CB}', '\u{1F0CC}', '\u{1F0CD}', '\u{1F0CE}'];
+	clubs = ['\u{1F0D1}', '\u{1F0D2}', '\u{1F0D3}', '\u{1F0D4}', '\u{1F0D5}', '\u{1F0D6}', '\u{1F0D7}', '\u{1F0D8}', '\u{1F0D9}', 
+			'\u{1F0DA}',  '\u{1F0DB}', '\u{1F0DC}', '\u{1F0DD}', '\u{1F0DE}'];
+	cards = [this.spades, this.hearts, this.diamonds, this.clubs].flat()
 
 	constructor(){
 		this.deck = [];
 		this.reset();
 		this.shuffle();
+
 	}
   
 	reset(){
-		this.deck = [];
-  
-		const spades: string[] = ['\u{1F0A1}', '\u{1F0A2}', '\u{1F0A3}', '\u{1F0A4}', '\u{1F0A5}', '\u{1F0A6}', '\u{1F0A7}', '\u{1F0A8}', '\u{1F0A9}', 
-			'\u{1F0AA}', '\u{1F0AB}', '\u{1F0AC}', '\u{1F0AD}', '\u{1F0AE}'];
-		const hearts: string [] = ['\u{1F0B1}', '\u{1F0B2}', '\u{1F0B3}', '\u{1F0B4}', '\u{1F0B5}', '\u{1F0B6}', '\u{1F0B7}', '\u{1F0B8}', '\u{1F0B9}', 
-			'\u{1F0BA}',  '\u{1F0BB}', '\u{1F0BC}', '\u{1F0BD}', '\u{1F0BE}'];
-		const diamonds: string[] = ['\u{1F0C1}', '\u{1F0C2}', '\u{1F0C3}', '\u{1F0C4}', '\u{1F0C5}', '\u{1F0C6}', '\u{1F0C7}', '\u{1F0C8}', '\u{1F0C9}', 
-		'\u{1F0CA}',  '\u{1F0CB}', '\u{1F0CC}', '\u{1F0CD}', '\u{1F0CE}'];
-		const clubs = ['\u{1F0D1}', '\u{1F0D2}', '\u{1F0D3}', '\u{1F0D4}', '\u{1F0D5}', '\u{1F0D6}', '\u{1F0D7}', '\u{1F0D8}', '\u{1F0D9}', 
-		'\u{1F0DA}',  '\u{1F0DB}', '\u{1F0DC}', '\u{1F0DD}', '\u{1F0DE}'];
-	
-		this.deck = [spades, hearts, diamonds, clubs].flat()
+		this.deck = [...Array(52).keys()];
 	}
   
 	shuffle(){
@@ -39,7 +38,15 @@ class Deck {
 	}
   
 	deal(): string{
-		return this.deck.pop()??"error";
+		return this.cards[this.deck.pop()??53]
+	}
+
+	dealHand(n= 13): string[] {
+		const hand: string[] = [];
+		for (let i = 0; i< n; i++) {
+			hand.push(this.deal()) 
+		}
+		return hand;
 	}
   }
 
@@ -72,8 +79,8 @@ export default class BridgePlugin extends Plugin {
 
 		// This adds a simple command that can be triggered anywhere
 		this.addCommand({
-			id: 'open-sample-modal-simple',
-			name: 'Open sample modal (simple)',
+			id: 'deal-balanced hand',
+			name: 'DealHand',
 			callback: () => {
 				new BridgeModal(this.app).open();
 			}
@@ -140,7 +147,9 @@ class BridgeModal extends Modal {
 
 	onOpen() {
 		const {contentEl} = this;
-		contentEl.setText('Woah!');
+		const hand = new Deck().dealHand();
+		contentEl.addClass('card');
+		contentEl.setText(hand.toString())
 	}
 
 	onClose() {
