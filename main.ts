@@ -3,21 +3,19 @@ import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Set
 class Deck {
 
 	deck: number[];
-	spades: string[] = ['\u{1F0A1}', '\u{1F0A2}', '\u{1F0A3}', '\u{1F0A4}', '\u{1F0A5}', '\u{1F0A6}', '\u{1F0A7}', '\u{1F0A8}', '\u{1F0A9}', 
-			'\u{1F0AA}', '\u{1F0AB}', '\u{1F0AC}', '\u{1F0AD}', '\u{1F0AE}'];
-	hearts: string [] = ['\u{1F0B1}', '\u{1F0B2}', '\u{1F0B3}', '\u{1F0B4}', '\u{1F0B5}', '\u{1F0B6}', '\u{1F0B7}', '\u{1F0B8}', '\u{1F0B9}', 
-			'\u{1F0BA}',  '\u{1F0BB}', '\u{1F0BC}', '\u{1F0BD}', '\u{1F0BE}'];		
-	diamonds: string[] = ['\u{1F0C1}', '\u{1F0C2}', '\u{1F0C3}', '\u{1F0C4}', '\u{1F0C5}', '\u{1F0C6}', '\u{1F0C7}', '\u{1F0C8}', '\u{1F0C9}', 
-			'\u{1F0CA}',  '\u{1F0CB}', '\u{1F0CC}', '\u{1F0CD}', '\u{1F0CE}'];
-	clubs = ['\u{1F0D1}', '\u{1F0D2}', '\u{1F0D3}', '\u{1F0D4}', '\u{1F0D5}', '\u{1F0D6}', '\u{1F0D7}', '\u{1F0D8}', '\u{1F0D9}', 
-			'\u{1F0DA}',  '\u{1F0DB}', '\u{1F0DC}', '\u{1F0DD}', '\u{1F0DE}'];
-	cards = [this.spades, this.hearts, this.diamonds, this.clubs].flat()
+	number_of_hands: number
+	number_of_cards_in_a_hand: number
+	hands: number[][];
+	current_card: number;
 
-	constructor(){
-		this.deck = [];
-		this.reset();
+	constructor(number_of_hands = 4, number_of_cards_in_a_hand = 13){
+		this.deck = this.deck = [...Array(52).keys()];
+		this.number_of_hands = number_of_hands;
+		this.number_of_cards_in_a_hand = number_of_cards_in_a_hand;
+		//this.reset();
 		this.shuffle();
-
+		this.deal();
+		this.current_card = 0;
 	}
   
 	reset(){
@@ -36,18 +34,65 @@ class Deck {
   
 		return this;
 	}
+
+	cardValue(idx: number): string {
+		//return ['A', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'][idx % 13]
+		return '4';
+	}
   
-	deal(): string{
-		return this.cards[this.deck.pop()??53]
+	deal() {
+		this.hands = [];
+		for (let hand_idx = 0; hand_idx < this.number_of_hands; hand_idx++){
+			// push empty array into hands
+			this.hands.push([])
+			for (let dealt_card_idx = 0; dealt_card_idx < this.number_of_cards_in_a_hand; dealt_card_idx++){
+				// add new item to end of relevant inner array
+				this.hands[hand_idx].push(this.deck[hand_idx * this.number_of_cards_in_a_hand + dealt_card_idx])
+			}
+			this.hands[hand_idx].sort()
+		}
+
 	}
 
-	dealHand(n= 13): string[] {
-		const hand: string[] = [];
-		for (let i = 0; i< n; i++) {
-			hand.push(this.deal()) 
-		}
-		return hand;
+	displayHand(idx: number){
+		const hand = this.hands[idx]
+		const suits: [number[], number [], number [], number[]] = [[], [], [], []];
+		console.log(this.cardValue(3))
+		hand.forEach(function(card, index) {
+			suits[Math.floor(card/13)].push(card)
+		})
+		// sort hand Aces to the top
+		suits.forEach(function(card) {
+			card.sort(function(a, b){
+				if (a % 13 == 0) {
+					return -1
+				} else {
+					if (b % 13 == 0) {
+						return 1
+					} else {
+					return b - a
+					}
+				}
+			})
+		})
+		const size = 10;
+ 		let display_string = '<div class="card-table">'
+		suits.forEach(function(suit, idx){
+			const suit_symbol: string = ["\u{2660}", "\u{2665}", "\u{2666}", "\u{2663}"][idx]
+			const suit_name: string = ["spades", " hearts", "diamonds", "clubs"][idx]
+			display_string += '<div><span class="'+suit_name +'">' + suit_symbol + '</span>'
+			suit.forEach(function(card){
+				display_string += '<span class= "playing-card">' + ['A', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'][card % 13] + '</span><span>&nbsp</span>'
+			});
+			display_string += '</div>';
+			
+		})
+		display_string += "</div>"
+
+
+		return display_string;
 	}
+	
   }
 
 interface BridgePluginSettings {
@@ -67,8 +112,8 @@ export default class BridgePlugin extends Plugin {
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
-			const pack = new Deck().shuffle()
-			new Notice(pack.deal());
+			
+			new Notice("help");
 		});
 		// Perform additional things with the ribbon
 		ribbonIconEl.addClass('my-plugin-ribbon-class');
@@ -147,9 +192,8 @@ class BridgeModal extends Modal {
 
 	onOpen() {
 		const {contentEl} = this;
-		const hand = new Deck().dealHand();
-		contentEl.addClass('card');
-		contentEl.setText(hand.toString())
+		contentEl.innerHTML = new Deck().displayHand(0)
+		//contentEl.setText(new Deck().displayHand(0));
 	}
 
 	onClose() {
