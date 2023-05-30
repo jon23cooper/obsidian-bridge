@@ -1,4 +1,27 @@
+.hearts, .diamonds{
+    color: red;
+    font-size: 3em;
+    width: 1em;
+}
 
-.card {
-    font-size: 100px;
+.spades, .clubs {
+    color: black;
+    font-size: 3em;
+    width: 1em;
+}
+
+.playing-card {
+    border: 1px solid black;
+    font-size: 3em;
+    display: inline-block;
+    width: 1.2em;
+    text-align: center;
+}
+
+.card-table {
+    background-color:green;
+    width: 55em;
+}
+.card-table span {
+    display: inline-block;
 }
